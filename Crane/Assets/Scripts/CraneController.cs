@@ -21,11 +21,17 @@ public class CraneController : MonoBehaviour
 
 
 
+
     /// <summary>
     /// Move and rotate the player every frame
     /// </summary>
     private void Update()
     {
+        if (Input.GetMouseButtonDown(0) && currentCollectable != null)
+        {
+            currentCollectable = null;
+        }
+
         //Player input + other factors
         float j1RotY = Input.GetAxis("Mouse X") * Time.deltaTime * j1Speed;
         float j1RotX = Input.GetAxis("Mouse Y") * Time.deltaTime * j1Speed;
@@ -42,7 +48,6 @@ public class CraneController : MonoBehaviour
                 return;
             }
         }
-
         j1X.Rotate(j1RotX, 0, 0);
         j2.Rotate(j2RotX, 0, 0);
 
@@ -94,13 +99,14 @@ public class CraneController : MonoBehaviour
         //gameOver = true;
     }
 
-    public void SetCurrentCollectable(Transform _transform)
+    public void SetCurrentCollectable(Transform _collectable)
     {
         if(currentCollectable != null)
         {
             return;
         }
-        currentCollectable = _transform;
+        currentCollectable = _collectable;
+        _collectable.GetComponent<Collectable>().GrabObject();
     }
 
     private void MoveCollectable()

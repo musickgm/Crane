@@ -82,40 +82,7 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
-    /// <summary>
-    /// Handles collectable logic and feeds coroutines if a powerup.
-    /// </summary>
-    /// <param name="collectionType"></param> What type of collectable?
-    /// <param name="clip"></param> What audio clip to play?
-    public void CollectObject(Collectable.CollectableType collectionType, AudioClip clip)
-    {
-        GetComponent<AudioSource>().PlayOneShot(clip, 0.7f);
-        switch(collectionType)
-        {
-            case Collectable.CollectableType.Coin:
-                score += coinValue;
-                break;
-            case Collectable.CollectableType.Camera:
-                if (minimapCoroutine != null)
-                {
-                    StopCoroutine(minimapCoroutine);
-                }
-                minimapCoroutine = MiniMap();
-                StartCoroutine(minimapCoroutine); 
-                break;
-            case Collectable.CollectableType.Invisible:
-                if(invisibleCoroutine != null)
-                {
-                    StopCoroutine(invisibleCoroutine);
-                }
-                invisibleCoroutine = InvisibleWalls();
-                StartCoroutine(invisibleCoroutine);
-                break;
-            case Collectable.CollectableType.Objective:
-                FinishGame();
-                break;
-        }
-    }
+
 
     /// <summary>
     /// Every frame update the score

@@ -68,6 +68,7 @@
     <Compile Include="Assets\Scripts\CraneController.cs" />
     <Compile Include="Assets\Scripts\CraneEnd.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
+    <Compile Include="Assets\Scripts\MouthMovement.cs" />
     <Compile Include="Assets\Scripts\Singleton.cs" />
     <None Include="Assets\README.txt" />
     <Reference Include="Unity.Timeline.Editor">
