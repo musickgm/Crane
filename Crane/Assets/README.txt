@@ -55,6 +55,7 @@ this solution is effective. However, some wall clipping does occur in extreme ca
 
 SOURCES:
 -Panorama dentist office image from: https://walkthru360.com/city-smiles-dental-office-360-google-maps-virtual-tour/
--Singleton.cs copied from a previous project of mine. Not sure what the original source was. 
+-Drill sfx taken from soundbible.com (public domain)
+-CHaching sfx taken from soundboard.com (personal or commercial use)
 -SFX and background audio was from Phys 1 (a game I developed) - I have rights to the music which was made
 by August Pappas, a friend of mine. 

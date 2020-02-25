@@ -6,6 +6,7 @@ public class MouthMovement : MonoBehaviour
 {
     public Vector3 variance;
     public float speed;
+    public List<Collectable> teeth = new List<Collectable>();
 
     private Vector3 position1;
     private Vector3 position2;
@@ -21,5 +22,14 @@ public class MouthMovement : MonoBehaviour
     void Update()
     {
         transform.localPosition = Vector3.Lerp(position1, position2, Mathf.PingPong(Time.time * speed, 1.0f));
+    }
+
+    public void RemoveTooth(Collectable tooth)
+    {
+        teeth.Remove(tooth);
+        if(teeth.Count == 0)
+        {
+            gameObject.SetActive(false);
+        }
     }
 }

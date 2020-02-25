@@ -7,33 +7,24 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// Handles game logic (start, finish, collectables, communicates with UI, and handles sfx
 /// </summary>
-public class GameManager : Singleton<GameManager>
+public class GameManager : MonoBehaviour
 {
     #region Public Variables
-    public int startingScore = 200;                 //Score to start with
-    public int coinValue = 3;                       //How much is a coin worth?
-    public float secondsBetweenReduction;           //How many seconds between point reduction?
-    public int scoreReductionValue;                 //How many points to reduce?
-    public int wallBonusTime = 10;                  //How long does the wall bonus last?
-    public int mapBonusTime = 20;                   //How long does the minimap bonus last?
-    public Material material1;                      //Materials to make clear with bonus
-    public Material material2;
+    public int gameTime = 60;
     public Text scoreText;                          //Text displaying the score
-    public Camera miniMap;                          //Camera to wake up for minimap bonus
-    public Text mapCountdownText;                   //Text that displays minimap bonus time remaining
-    public Text wallCountdownText;                  //Text that displays wall bonus time remaining
+    public Text timeText;
     public CanvasGroup popupGroup;                  //Displays the initial and final instructions
     public Text popupText;
     public CraneController controller;             //The player controller
+    public AudioClip collectAudio;
+
     #endregion
     #region Private Variables
-    private bool isGameOver = false;
-    private int score;
-    private IEnumerator scoreCoroutine;
-    private IEnumerator invisibleCoroutine;
-    private IEnumerator minimapCoroutine;
+    private int startingScore = 0;                 //Score to start with
+    private float score;
     private IEnumerator popupCoroutine;
-    private Color invisibleColor = Color.white;
+    private IEnumerator gameCoroutine;
+
     #endregion
 
 
@@ -42,36 +33,25 @@ public class GameManager : Singleton<GameManager>
     /// </summary>
     void Start()
     {
+        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = false;
         score = startingScore;
-        scoreCoroutine = ScoreReducer();
-        StartCoroutine(scoreCoroutine);
+        UpdateScore();
+        timeText.text = gameTime.ToString();
 
-
-        material1.SetColor("_Color", Color.white);
-        material2.SetColor("_Color", Color.white);
-        invisibleColor.a = 0;
-        wallCountdownText.enabled = false;
-        mapCountdownText.enabled = false;
-        miniMap.enabled = false;
-        popupCoroutine = InstructionFade(0, 5, 2);
+        popupCoroutine = InstructionFade(0, 3.5f, 2);
         StartCoroutine(popupCoroutine);
+        gameCoroutine = GameTime();
+        StartCoroutine(gameCoroutine);
     }
 
-    /// <summary>
-    /// Reset the materials at the end
-    /// </summary>
-    private void OnApplicationQuit()
-    {
-        material1.SetColor("_Color", Color.white);
-        material2.SetColor("_Color", Color.white);
-    }
+
 
     /// <summary>
     /// Update is called once per frame. Look for quitting or restarting input. Update the score
     /// </summary>
     void Update()
     {
-        UpdateScore();
         if(Input.GetKeyDown(KeyCode.R))
         {
             SceneManager.LoadScene(0);
@@ -89,7 +69,7 @@ public class GameManager : Singleton<GameManager>
     /// </summary>
     private void UpdateScore()
     {
-        scoreText.text = score.ToString();
+        scoreText.text = "$ " + score.ToString();
     }
 
     /// <summary>
@@ -97,82 +77,25 @@ public class GameManager : Singleton<GameManager>
     /// </summary>
     private void FinishGame()
     {
-        popupText.text = "YOU WIN! \n PRESS 'R' TO RESTART";
+        popupText.text = "FAIRY EARNINGS = $" + score.ToString() + "\n PRESS 'R' TO RESTART";
         popupCoroutine = InstructionFade(1, 0, 2);
         StartCoroutine(popupCoroutine);
-        isGameOver = true;
         controller.SetGameOver();
     }
 
-    /// <summary>
-    /// Everytime the amount of time passes that decreases the score, decrease it a certain amount. 
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator ScoreReducer()
+
+    public void PlayAudio(AudioClip clip)
     {
-        while(!isGameOver)
-        {
-            yield return new WaitForSeconds(secondsBetweenReduction);
-            score -= scoreReductionValue;
-        }
+        GetComponent<AudioSource>().PlayOneShot(clip, 0.7f);
     }
 
-    /// <summary>
-    /// Invisible wall powerup
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator InvisibleWalls()
+    public void CollectItem(float value)
     {
-        //Set the wall materials to invisible
-        material1.SetColor("_Color", invisibleColor);
-        material2.SetColor("_Color", invisibleColor);
-
-        //Setup the timer initially
-        int timeRemaining = wallBonusTime;
-        wallCountdownText.text = timeRemaining.ToString();
-        wallCountdownText.enabled = true;
-        //While the time hasn't run out, reduce the time and update the text
-        while (timeRemaining > 0)
-        {
-            yield return new WaitForSeconds(1);
-            timeRemaining--;
-            wallCountdownText.text = timeRemaining.ToString();
-        }
-
-        yield return new WaitForSeconds(0.1f);
-
-        //Return the original material and remove the text
-        wallCountdownText.enabled = false;
-        material1.SetColor("_Color", Color.white);
-        material2.SetColor("_Color", Color.white);
-        yield return null;
+        score += value;
+        PlayAudio(collectAudio);
+        UpdateScore();
     }
 
-    /// <summary>
-    /// Minimap powerup
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator MiniMap()
-    {
-        //Turn on the minimap and set the text counter initially
-        miniMap.enabled = true;
-        int timeRemaining = mapBonusTime;
-        mapCountdownText.text = timeRemaining.ToString();
-        mapCountdownText.enabled = true;
-        //While time still remains, decrement the time
-        while(timeRemaining > 0)
-        {
-            yield return new WaitForSeconds(1);
-            timeRemaining--;
-            mapCountdownText.text = timeRemaining.ToString();
-        }
-
-        //Return things to normal
-        yield return new WaitForSeconds(0.1f);
-        miniMap.enabled = false;
-        mapCountdownText.enabled = false;
-        yield return null;
-    }
 
     /// <summary>
     /// Fade the popup canvas
@@ -192,6 +115,20 @@ public class GameManager : Singleton<GameManager>
             popupGroup.alpha = Mathf.Lerp(startingAlpha, finalAlpha, t / timeToFade);
             yield return new WaitForEndOfFrame();
         }
+    }
+
+    private IEnumerator GameTime()
+    {
+        //Wait the amount of time equal to the instructions
+        yield return new WaitForSeconds(3.5f);
+
+        while(gameTime > 0)
+        {
+            yield return new WaitForSeconds(1);
+            gameTime--;
+            timeText.text = gameTime.ToString() + " s";
+        }
+        FinishGame();
     }
 
 }

@@ -69,7 +69,8 @@
     <Compile Include="Assets\Scripts\CraneEnd.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Scripts\MouthMovement.cs" />
-    <Compile Include="Assets\Scripts\Singleton.cs" />
+    <Compile Include="Assets\Scripts\Pillow.cs" />
+    <Compile Include="Assets\Scripts\ToothDestroyer.cs" />
     <None Include="Assets\README.txt" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>D:/Unity Projects/Crane/Crane/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>

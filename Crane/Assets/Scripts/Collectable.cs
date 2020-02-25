@@ -9,7 +9,8 @@ public class Collectable : MonoBehaviour
 {
     public float collectableValue;
     public AudioClip _clip;                             //Audio clip associated with collecting this item
-
+    public MouthMovement mouthParent;
+    public GameManager manager;
 
 
     public void GrabObject()
@@ -17,5 +18,7 @@ public class Collectable : MonoBehaviour
         transform.parent = null;
         GetComponent<Rigidbody>().isKinematic = false;
         GetComponent<Rigidbody>().useGravity = true;
+        mouthParent.RemoveTooth(this);
+        manager.PlayAudio(_clip);
     }
 }

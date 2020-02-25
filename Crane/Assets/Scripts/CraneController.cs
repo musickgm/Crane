@@ -18,7 +18,7 @@ public class CraneController : MonoBehaviour
     public CraneEnd craneEnd;
 
     private Transform currentCollectable = null;
-
+    private bool gameOver = false;
 
 
 
@@ -96,12 +96,12 @@ public class CraneController : MonoBehaviour
     /// </summary>
     public void SetGameOver()
     {
-        //gameOver = true;
+        gameOver = true;
     }
 
     public void SetCurrentCollectable(Transform _collectable)
     {
-        if(currentCollectable != null)
+        if(currentCollectable != null || gameOver)
         {
             return;
         }
