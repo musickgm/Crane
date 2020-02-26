@@ -14,6 +14,7 @@ public class MouthMovement : MonoBehaviour
 
     private Vector3 position1;
     private Vector3 position2;
+    private float time = 0;
 
     /// <summary>
     /// Determine position 1 and 2 based on variance.
@@ -22,6 +23,7 @@ public class MouthMovement : MonoBehaviour
     {
         position1 = transform.localPosition + variance;
         position2 = transform.localPosition - variance;
+        transform.localPosition = position1;
     }
 
 
@@ -33,7 +35,8 @@ public class MouthMovement : MonoBehaviour
         {
             return;
         }
-        transform.localPosition = Vector3.Lerp(position1, position2, Mathf.PingPong(Time.time * speed, 1.0f));
+        time += Time.deltaTime;
+        transform.localPosition = Vector3.Lerp(position1, position2, Mathf.PingPong(time * speed, 1.0f));
     }
 
     /// <summary>
