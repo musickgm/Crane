@@ -11,15 +11,7 @@ public class CameraFollow : MonoBehaviour
     public Vector3 offset;                      //Position offset of the camera
     public float springConstantPos = 0.05f;     //Spring constant for position
     public float springConstantRot = 80f;       //Spring constant for rotation
-    private LayerMask mask;                     //The mask to account for wall clipping
 
-    /// <summary>
-    /// Start is called before the first frame update - set the mask to walls
-    /// </summary>
-    void Start()
-    {
-        mask = LayerMask.GetMask("Wall");
-    }
 
     /// <summary>
     /// Lerps both position and rotation smoothly and follows/looks at the player
@@ -30,14 +22,6 @@ public class CameraFollow : MonoBehaviour
 
         Vector3 goalPosition = player.position + (goalRotation * offset);
 
-        //Adapted from: https://www.reddit.com/r/Unity3D/comments/cfzv5r/made_a_thirdperson_camera_collision_adjustment/eudmi61/
-        //Checks to see if a wall is in between the camera and the "goal position". 
-        RaycastHit camHit;
-        if (Physics.Linecast(transform.position, goalPosition, out camHit, mask))
-        {
-            //Resets the goal position with a weighted average in favor of the wall/hit point
-            goalPosition = ((camHit.point * 9) + player.position) / 10;
-        }
 
         Vector3 lerpPosition = Vector3.Lerp(transform.position, goalPosition, springConstantPos);
 

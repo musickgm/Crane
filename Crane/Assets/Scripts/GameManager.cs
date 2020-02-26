@@ -10,22 +10,22 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     #region Public Variables
-    public int gameTime = 60;
+    public int gameTime = 60;                       //How long the game should last
     public Text scoreText;                          //Text displaying the score
-    public Text timeText;
+    public Text timeText;                           //Text displaying remaining time
     public CanvasGroup popupGroup;                  //Displays the initial and final instructions
-    public Text popupText;
+    public Text popupText;                          //Pop up text for instructions
     public CraneController controller;             //The player controller
-    public AudioClip collectAudio;
+    public AudioClip collectAudio;                  //Audio played when we collect (on pillow)
     [HideInInspector]
-    public bool initialWait = true;
+    public bool initialWait = true;                 //Bool handling initial game logic
     [HideInInspector]
-    public bool gameOver = false;
+    public bool gameOver = false;                   //Bool handling end game logic
 
     #endregion
     #region Private Variables
-    private int startingScore = 0;                 //Score to start with
-    private float score;
+    private float score = 0;
+    private readonly float initialWaitTime = 3.5f;
     private IEnumerator popupCoroutine;
     private IEnumerator gameCoroutine;
 
@@ -38,22 +38,21 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         initialWait = true;
+        //Hide the cursor
         Cursor.lockState = CursorLockMode.Confined;
         Cursor.visible = false;
-        score = startingScore;
+        //Set initial score/time
         UpdateScore();
         timeText.text = gameTime.ToString();
-
-        popupCoroutine = InstructionFade(0, 3.5f, 2);
+        //Start initial coroutines
+        popupCoroutine = InstructionFade(0, initialWaitTime, 2);
         StartCoroutine(popupCoroutine);
-        gameCoroutine = GameTime();
+        gameCoroutine = GameTime(initialWaitTime);
         StartCoroutine(gameCoroutine);
     }
 
-
-
     /// <summary>
-    /// Update is called once per frame. Look for quitting or restarting input. Update the score
+    /// Update is called once per frame. Look for quitting or restarting input.
     /// </summary>
     void Update()
     {
@@ -67,10 +66,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
-
     /// <summary>
-    /// Every frame update the score
+    /// When an item is collected, update the score text
     /// </summary>
     private void UpdateScore()
     {
@@ -90,11 +87,19 @@ public class GameManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Plays audio sent to it
+    /// </summary>
+    /// <param name="clip"></param>The clip to be played
     public void PlayAudio(AudioClip clip)
     {
         GetComponent<AudioSource>().PlayOneShot(clip, 0.7f);
     }
 
+    /// <summary>
+    /// Handles collecting items
+    /// </summary>
+    /// <param name="value"></param>The value of the collected item
     public void CollectItem(float value)
     {
         if(gameOver)
@@ -105,7 +110,6 @@ public class GameManager : MonoBehaviour
         PlayAudio(collectAudio);
         UpdateScore();
     }
-
 
     /// <summary>
     /// Fade the popup canvas
@@ -129,17 +133,23 @@ public class GameManager : MonoBehaviour
         yield return null;
     }
 
-    private IEnumerator GameTime()
+    /// <summary>
+    /// Handles the game time (how much time is left in the game)
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator GameTime(float waitTime)
     {
-        //Wait the amount of time equal to the instructions
-        yield return new WaitForSeconds(3.5f);
+        //Wait the amount of time equal to the instructions before starting
+        yield return new WaitForSeconds(waitTime);
 
+        //Every second, reduce the amount of time left (and update time text)
         while(gameTime > 0)
         {
             yield return new WaitForSeconds(1);
             gameTime--;
             timeText.text = gameTime.ToString() + " s";
         }
+        //When no time is left, end the game
         FinishGame();
         yield return null;
     }

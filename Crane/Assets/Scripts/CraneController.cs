@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Handles player movement and rotation using player input
+/// Handles player (crane) movement and rotation using player input
 /// </summary>
 public class CraneController : MonoBehaviour
 {
-    public float j1Speed = 4;             //How fast does the player move
-    public float j2Speed = 1;       //Sensitivity of rotation
-    public Transform j1X;
-    public Transform j1Y;
-    public Transform j2;
-    public float l1Length = 2;
-    public float l2Length = 2;
-    public float j3Length = .5f;
-    public CraneEnd craneEnd;
+    public float j1Speed = 4;               //Sensitivity of joint 1
+    public float j2Speed = 1;               //Sensitivity of joint 2
+    public Transform j1X;                   //Transform of joint 1 (x rotation)
+    public Transform j1Y;                   //Transform of joint 1 (y rotation)
+    public Transform j2;                    //Transform of joint 2
+    public float l1Length = 2;              //How long is L1?
+    public float l2Length = 2;              //How long is L2?
+    public float j3Length = .5f;            //How long is the end of the crane?
+    public CraneEnd craneEnd;               //Reference to the crane end script
 
     private Transform currentCollectable = null;
     private bool gameOver = false;
@@ -24,10 +24,11 @@ public class CraneController : MonoBehaviour
 
 
     /// <summary>
-    /// Move and rotate the player every frame
+    /// Move and rotate the player (crane) every frame
     /// </summary>
     private void Update()
     {
+        //When we get mouse input, drop the collectable
         if (Input.GetMouseButtonDown(0) && currentCollectable != null)
         {
             cooldownCoroutine = DropCooldown(1);
@@ -36,15 +37,16 @@ public class CraneController : MonoBehaviour
             currentCollectable = null;
         }
 
-        //Player input + other factors
+        //Player rotation input
         float j1RotY = Input.GetAxis("Mouse X") * Time.deltaTime * j1Speed;
         float j1RotX = Input.GetAxis("Mouse Y") * Time.deltaTime * j1Speed;
         float j2RotX = Input.GetAxis("Vertical")  * Time.deltaTime * j2Speed;
 
 
-        //Rotate the player
+        //Rotate the base (j1)
         j1Y.Rotate(0, j1RotY, 0);
 
+        //Make sure the end of the crane isn't colliding before rotating j1(x) or j2
         if(craneEnd.colliding)
         {
             if(j2RotX > 0 || j1RotX >0)
@@ -55,11 +57,14 @@ public class CraneController : MonoBehaviour
         j1X.Rotate(j1RotX, 0, 0);
         j2.Rotate(j2RotX, 0, 0);
 
-
         //Prevent bad movements/rotations with clamping
         Clamp();
     }
 
+
+    /// <summary>
+    /// Move the collectable if there is one at the end of each frame
+    /// </summary>
     private void LateUpdate()
     {
         if (currentCollectable != null)
@@ -69,7 +74,7 @@ public class CraneController : MonoBehaviour
     }
 
     /// <summary>
-    /// Clamp the player rotations and position to prevent wall climbing and unintentional x/z rotations
+    /// Clamp the player (crane) rotations and position to prevent "unnatural" rotations
     /// </summary>
     private void Clamp()
     {
@@ -103,6 +108,11 @@ public class CraneController : MonoBehaviour
         gameOver = true;
     }
 
+    /// <summary>
+    /// Sent from the end of the crane, assign a collectable if we don't have one, the game is still going on,
+    /// and we're not on a cool down.
+    /// </summary>
+    /// <param name="_collectable"></param>The transform of the collectable
     public void SetCurrentCollectable(Transform _collectable)
     {
         if(currentCollectable != null || gameOver || coolingDown)
@@ -113,23 +123,39 @@ public class CraneController : MonoBehaviour
         _collectable.GetComponent<Collectable>().GrabObject();
     }
 
+    /// <summary>
+    /// Use matrix multiplcation to assign the position/rotation of the collectable as
+    /// a requirement for this assignment.
+    /// Take into account the lengths of the appendages and the rotations of the joints
+    /// </summary>
     private void MoveCollectable()
     {
+        //Determine vectors for each appendage/length translation
         Vector3 l1Translation = new Vector3(0, l1Length, 0);
         Vector3 l2Translation = new Vector3(0, l2Length + j3Length, 0);
 
+        //Determine matrices for each translation and rotation
         Matrix4x4 l1Matrix = Matrix4x4.Translate(l1Translation);
         Matrix4x4 l2Matrix = Matrix4x4.Translate(l2Translation);
         Matrix4x4 j1YMatrix = Matrix4x4.Rotate(j1Y.localRotation);
         Matrix4x4 j1XMatrix = Matrix4x4.Rotate(j1X.localRotation);
         Matrix4x4 j2Matrix = Matrix4x4.Rotate(j2.localRotation);
 
+        //Determine final matrix using matrix multiplication
         Matrix4x4 finalMatrix =  j1YMatrix * j1XMatrix * l1Matrix * j2Matrix * l2Matrix;
+
+        //Extract/assign position/rotation from the final matrix to the collectable
         currentCollectable.position = new Vector3(finalMatrix[0, 3], finalMatrix[1, 3], finalMatrix[2, 3]);
         currentCollectable.rotation = finalMatrix.rotation;
 
     }
 
+    /// <summary>
+    /// After a collectable is dropped, allow a cool down time so that we don't
+    /// automatically pick up another item.
+    /// </summary>
+    /// <param name="time"></param>How long to wait?
+    /// <returns></returns>
     private IEnumerator DropCooldown(float time)
     {
         coolingDown = true;

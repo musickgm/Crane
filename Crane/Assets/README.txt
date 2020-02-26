@@ -1,61 +1,53 @@
 Geoff Musick
 CPSC 6820
-1/31/20
-Assignment 2: Maze
+2/26/20
+Assignment 4: The Crane: Using Foward Kinematics
 
 FUNCTIONALITY:
-I created a hedge maze where the player has to reach the center collectable to win. The controls are displayed
-in the top left corner. The player can move directionally with the WADS keys and change the direction they are
-looking with the mouse. The player can also increase speed with a sprint (shift) button.
-The score is displayed in the top right. The score starts at 200 (or some assigned value) and decreases over time. 
-On the way to the destination, 3 types of collectables (other than the objective) can be found:
-1) Yellow coins - add to the player's score.
-2) Semi-transparent blue coins - make the walls invisible for a certain amount of time.
-3) Big red coins - displays a mini-map for a certain amount of time.
-The 2nd and 3rd "power-up" type coins also show the amount of time remaining on the powerups. At the beginning,
-a canvas displays the objective (which fades away). At the end, a message displays the end of the game and prompts
-the user to restart (r key). A player can quit at any time with the escape key. Sound fx trigger when collectables
-are found. Additionally background music plays and loops throughout the game. 
+The functionality of this project includes a player controlled crane. The player can use the mouse
+to rotate the base joint (j1) using horizontal and vertical mouse input. Additionally, the player
+can rotate the middle joint (j2) using keyboard input (sw or arrows). The theme of the crane game
+involves a tooth fairy / dentist approach where you have to collect "teeth" and place them on a
+pillow to collect money (your score) in a certain amount of time. The teeth have a "mouth" parent
+that moves to make collection more challenging. 
 
 
 IMPLEMENTATION:
-For core game functions, I implemented a game manager that does the following:
--Communicates with collectables, sfx
--Handles starts/end game logic
--Controls UI popups
--Additional key inputs (R, escape)
-For movement, a player controller was implemented that takes in player input and translates/rotates the player
-accordingly. Additionally a clamp function is used to prevent unintentional rotation and other bugs.
-For spring camera implementation, see below. 
-The main problems I encountered dealt with wall clipping, unintentional player rotation, and the player being 
-able to climb walls with the sprint feature. I alleviated the wall climbing and the player rotation by 
-implmenting the clamp function for the PlayerController. Taking off colliders for the player's arms also
-removed the rotation problem. See wall clipping solution below. 
-Another problem I ran into was jerky motion when a player ran into a wall. I fixed this by checking for a 
-raycast and removing the sprint if the player was right in front of a wall. 
-For the minimap, I implemented a second camera (orthographic). For better visualization, I parented spheres
-above each collectable that are on their own layer that is excluded from the main camera. A gian cube
-above the player represents the player on the minimap as well. 
+For implementation, the controls center around a "CraneController" script that takes in player
+input to be used for rotating joints on the crane. The main challenge for this type of controller
+is constraining the joints so that they don't have "unnatural" rotations. For me this means keeping
+the end of the crane from going below the ground and keeping joints from rotating backwards. To keep
+the end from going underground, I used a "CraneEnd" script attached to a gameobject with a collider
+to look for collisions on the ground or with the crane itself. If this happened, I prevented the
+crane's joints from rotating in certain directions. I also used a clamp function to keep the joints
+from rotating backwards. The other important implementation involves moving the collectable without
+using parenting. For this I used Unity's Matrix4x4 to create matrices for each joint (rotation) and
+appendage (length/translation). After that I used matrix multiplcation to extract/assign position
+and rotation to the collectable while it was "attached" to the crane's end.
+Other implementations involved simple scripts to handle moving the "mouths", picking up/dropping
+"teeth", a game manager to handle the game's flow, and a collider script to destroy teeth that fall
+off the map. Finally, I adapted a 3rd person spring camera follow script from the previous maze 
+assignment. 
 
 
-
-FOLLOW-CAMERA
-For the spring camera, I implemented a CameraFollow script. This script works by setting a goal position and
-rotation that the camera "desires" to be at using an offset from the player. This goal position and rotation
-is lerped to using a spring constant for both rotation and position. Additionally, a linecast is used to avoid
-wall clipping as much as possible. I addapted the idea for the linecast from reddit: 
-https://www.reddit.com/r/Unity3D/comments/cfzv5r/made_a_thirdperson_camera_collision_adjustment/eudmi61/
-The idea behind the linecast is to check if there is a wall between where the camera is and its goal position.
-I adapted the reddit script to only do this if there are walls (since coins were causing a "lag" effect when
-the player walked past them). Additionally, I edited the linecast to put the camera as close to the wall as 
-possible by weighting an average 9:1 in favor of the way compared to the goal position. For the most part
-this solution is effective. However, some wall clipping does occur in extreme cases. 
-
+DESIGN CHOICES
+The main design choices I made pertained to how the crane rotates and constraints on the crane's
+movements. I think I did a decent job making the crane's movement feel natural; however, this 
+type of controller (rotating different joints) is not a normal one, so I'm guessing that my
+controller won't feel natural at first. I feel pretty good about preventing bad rotations with
+my clamping and using a collider to keep the crane from going underground. However, I could 
+perceive a user maybe being able to put the crane in an awkward position where they get stuck
+because of this. I wasn't able to create this bug, but I could definitely see its possibility.
+Other bugs that I "squashed" involve using a cool down time once a collectable is dropped so that
+it's not instantaneously picked up. This is necessary since no button input is needed to pick an
+item up (just collision) - I thought this feature would be useful since some camera angles make
+it hard to see where the end of the crane is, so picking up items could be challenging without
+"auto-picking up". Another bug I fixed is items being "auto dropped" into the pillow. I wanted
+the player to have to press a button (input) in order to drop. So the collider for the collectables
+is removed until the item is "dropped" by the player. 
 
 
 SOURCES:
 -Panorama dentist office image from: https://walkthru360.com/city-smiles-dental-office-360-google-maps-virtual-tour/
 -Drill sfx taken from soundbible.com (public domain)
 -CHaching sfx taken from soundboard.com (personal or commercial use)
--SFX and background audio was from Phys 1 (a game I developed) - I have rights to the music which was made
-by August Pappas, a friend of mine. 
