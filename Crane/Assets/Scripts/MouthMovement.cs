@@ -7,6 +7,7 @@ public class MouthMovement : MonoBehaviour
     public Vector3 variance;
     public float speed;
     public List<Collectable> teeth = new List<Collectable>();
+    public GameManager manager;
 
     private Vector3 position1;
     private Vector3 position2;
@@ -21,6 +22,10 @@ public class MouthMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(manager.initialWait || manager.gameOver)
+        {
+            return;
+        }
         transform.localPosition = Vector3.Lerp(position1, position2, Mathf.PingPong(Time.time * speed, 1.0f));
     }
 

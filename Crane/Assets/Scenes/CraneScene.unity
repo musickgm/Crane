@@ -1219,6 +1219,7 @@ MonoBehaviour:
   - {fileID: 1415562162}
   - {fileID: 1962745726}
   - {fileID: 303131304}
+  manager: {fileID: 963194230}
 --- !u!4 &442468023
 Transform:
   m_ObjectHideFlags: 0
@@ -1619,6 +1620,7 @@ MonoBehaviour:
   - {fileID: 90186479}
   - {fileID: 1819872596}
   - {fileID: 289086291}
+  manager: {fileID: 963194230}
 --- !u!4 &701681551
 Transform:
   m_ObjectHideFlags: 0
@@ -1988,7 +1990,7 @@ MonoBehaviour:
   player: {fileID: 1507822477}
   offset: {x: 0, y: 7, z: -6}
   springConstantPos: 0.05
-  springConstantRot: 80
+  springConstantRot: 60
 --- !u!114 &963194230
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2001,13 +2003,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 440e88f580006d04fa54a979991e9699, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameTime: 45
+  gameTime: 60
   scoreText: {fileID: 1880589608535012726}
   timeText: {fileID: 2096431555}
   popupGroup: {fileID: 1880589610324594680}
   popupText: {fileID: 1880589609166303454}
   controller: {fileID: 1459669417}
   collectAudio: {fileID: 8300000, guid: b896c7b4e4dff0a49834f9686a2f34f6, type: 3}
+  initialWait: 1
+  gameOver: 0
 --- !u!82 &963194231
 AudioSource:
   m_ObjectHideFlags: 0
@@ -3893,6 +3897,7 @@ MonoBehaviour:
   - {fileID: 783621994}
   - {fileID: 1683592956}
   - {fileID: 1515795256}
+  manager: {fileID: 963194230}
 --- !u!1 &1840797337
 GameObject:
   m_ObjectHideFlags: 0

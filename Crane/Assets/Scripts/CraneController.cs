@@ -19,7 +19,8 @@ public class CraneController : MonoBehaviour
 
     private Transform currentCollectable = null;
     private bool gameOver = false;
-
+    private bool coolingDown = false;
+    private IEnumerator cooldownCoroutine;
 
 
     /// <summary>
@@ -29,6 +30,9 @@ public class CraneController : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0) && currentCollectable != null)
         {
+            cooldownCoroutine = DropCooldown(1);
+            StartCoroutine(cooldownCoroutine);
+            currentCollectable.GetComponent<BoxCollider>().enabled = true;
             currentCollectable = null;
         }
 
@@ -101,7 +105,7 @@ public class CraneController : MonoBehaviour
 
     public void SetCurrentCollectable(Transform _collectable)
     {
-        if(currentCollectable != null || gameOver)
+        if(currentCollectable != null || gameOver || coolingDown)
         {
             return;
         }
@@ -124,6 +128,14 @@ public class CraneController : MonoBehaviour
         currentCollectable.position = new Vector3(finalMatrix[0, 3], finalMatrix[1, 3], finalMatrix[2, 3]);
         currentCollectable.rotation = finalMatrix.rotation;
 
+    }
+
+    private IEnumerator DropCooldown(float time)
+    {
+        coolingDown = true;
+        yield return new WaitForSeconds(time);
+        coolingDown = false;
+        yield return null;
     }
 }
 

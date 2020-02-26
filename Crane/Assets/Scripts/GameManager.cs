@@ -17,6 +17,10 @@ public class GameManager : MonoBehaviour
     public Text popupText;
     public CraneController controller;             //The player controller
     public AudioClip collectAudio;
+    [HideInInspector]
+    public bool initialWait = true;
+    [HideInInspector]
+    public bool gameOver = false;
 
     #endregion
     #region Private Variables
@@ -33,6 +37,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     void Start()
     {
+        initialWait = true;
         Cursor.lockState = CursorLockMode.Confined;
         Cursor.visible = false;
         score = startingScore;
@@ -81,6 +86,7 @@ public class GameManager : MonoBehaviour
         popupCoroutine = InstructionFade(1, 0, 2);
         StartCoroutine(popupCoroutine);
         controller.SetGameOver();
+        gameOver = true;
     }
 
 
@@ -91,6 +97,10 @@ public class GameManager : MonoBehaviour
 
     public void CollectItem(float value)
     {
+        if(gameOver)
+        {
+            return;
+        }
         score += value;
         PlayAudio(collectAudio);
         UpdateScore();
@@ -101,12 +111,12 @@ public class GameManager : MonoBehaviour
     /// Fade the popup canvas
     /// </summary>
     /// <param name="finalAlpha"></param>Either 1 or 0 (on or off)
-    /// <param name="initialWait"></param> How long before fading?
+    /// <param name="waitTime"></param> How long before fading?
     /// <param name="timeToFade"></param> How long does it take to fade?
     /// <returns></returns>
-    private IEnumerator InstructionFade(float finalAlpha, float initialWait, float timeToFade)
+    private IEnumerator InstructionFade(float finalAlpha, float waitTime, float timeToFade)
     {
-        yield return new WaitForSeconds(initialWait);
+        yield return new WaitForSeconds(waitTime);
         float startingAlpha = popupGroup.alpha;
         float t = 0;
         while(popupGroup.alpha != finalAlpha)
@@ -115,6 +125,8 @@ public class GameManager : MonoBehaviour
             popupGroup.alpha = Mathf.Lerp(startingAlpha, finalAlpha, t / timeToFade);
             yield return new WaitForEndOfFrame();
         }
+        initialWait = false;
+        yield return null;
     }
 
     private IEnumerator GameTime()
@@ -129,6 +141,7 @@ public class GameManager : MonoBehaviour
             timeText.text = gameTime.ToString() + " s";
         }
         FinishGame();
+        yield return null;
     }
 
 }

@@ -20,5 +20,11 @@ public class Collectable : MonoBehaviour
         GetComponent<Rigidbody>().useGravity = true;
         mouthParent.RemoveTooth(this);
         manager.PlayAudio(_clip);
+        GetComponent<BoxCollider>().enabled = false;
     }
+
+    /*public void DropObject()
+    {
+        GetComponent<BoxCollider>().enabled = true; 
+    }*/
 }
